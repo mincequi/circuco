@@ -1,0 +1,6 @@
+#temperature {
+  --color: #375a7f;
+}
+#temperature.column {
+  height: 144px;
+}
