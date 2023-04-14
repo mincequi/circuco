@@ -9,7 +9,7 @@
 
 class HttpServer {
 public:
-    HttpServer(Config& config, const HtmlRenderer& renderer, const FileSystem& fileSystem) :
+    HttpServer(ConfigRepository& config, const HtmlRenderer& renderer, const FileDataSource& fileSystem) :
     _renderer(renderer),
     _fileSystem(fileSystem),
     _httpServer(80) {
@@ -89,6 +89,6 @@ private:
     }
 
     const HtmlRenderer& _renderer;
-    const FileSystem& _fileSystem;
+    const FileDataSource& _fileSystem;
     ESP8266WebServer _httpServer;
 };

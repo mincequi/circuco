@@ -11,16 +11,16 @@
 #include <TemperatureSensorDs18b20.hpp>
 #include <WifiManager.hpp>
 
-WifiManager wifiManager;
-Config config;
 TemperatureSensorDs18b20 sensor;
 GpioActuator actuator;
-FileSystem fileSystem;
+FileDataSource fileDataSource;
 // Since i experienced OOM exception after a while, I moved the following objects on the heap.
 // This is was the ESP8266 doc tells me:
 // https://arduino-esp8266.readthedocs.io/en/latest/faq/a02-my-esp-crashes.html#other-causes-for-crashes
 // "Objects that have large data members, such as large arrays, should also be avoided on the stack,
 //  and should be dynamically allocated (consider smart pointers)."
+ConfigRepository configRepository(fileDataSource);
+std::unique_ptr<WifiManager> wifiManager;
 std::unique_ptr<DeviceManager> deviceManager;
 std::unique_ptr<HtmlRenderer> htmlRenderer;
 std::unique_ptr<HttpServer> httpServer;
@@ -28,7 +28,6 @@ std::unique_ptr<HttpServer> httpServer;
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(115200);
-    wifiManager.connect();
     sensor.setup();
 
     configTime("CET-1CEST,M3.5.0/02,M10.5.0/3", "de.pool.ntp.org");
@@ -43,18 +42,20 @@ void setup() {
     std::cout << std::endl << "IP: " << WiFi.localIP().toString().c_str() << std::endl;
     */
 
-    deviceManager = std::make_unique<DeviceManager>(config, sensor, actuator);
-    htmlRenderer = std::make_unique<HtmlRenderer>(config, sensor, actuator, *deviceManager, fileSystem);
-    httpServer = std::make_unique<HttpServer>(config, *htmlRenderer, fileSystem);
+    wifiManager = std::make_unique<WifiManager>(configRepository);
+    deviceManager = std::make_unique<DeviceManager>(configRepository, sensor, actuator);
+    htmlRenderer = std::make_unique<HtmlRenderer>(configRepository, sensor, actuator, *deviceManager, fileDataSource);
+    httpServer = std::make_unique<HttpServer>(configRepository, *htmlRenderer, fileDataSource);
 
+    wifiManager->connect();
     htmlRenderer->setup();
 
     pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
-  if (!wifiManager.isConnected()) {
-    wifiManager.connect();
+  if (!wifiManager->isConnected()) {
+    wifiManager->connect();
   }
 
   // Check if we want to update devices
@@ -62,7 +63,7 @@ void loop() {
   const auto now = millis();
   digitalWrite(LED_BUILTIN, HIGH);
 
-  if (_millis + config.loopInterval < now) {
+  if (_millis + configRepository.loopInterval < now) {
     digitalWrite(LED_BUILTIN, LOW);
     _millis = now;
     deviceManager->loop(_millis);

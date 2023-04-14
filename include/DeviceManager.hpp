@@ -2,13 +2,13 @@
 
 #include <AbstractActuator.hpp>
 #include <AbstractSensor.hpp>
-#include <Config.hpp>
+#include <ConfigRepository.hpp>
 
 #include <deque>
 
 class DeviceManager {
 public:
-    DeviceManager(const Config& config,
+    DeviceManager(const ConfigRepository& config,
                   AbstractSensor<int16_t>& sensor,
                   AbstractActuator& actuator) :
         _config(config),
@@ -52,7 +52,7 @@ public:
     }
 
 private:
-    const Config& _config;
+    const ConfigRepository& _config;
     AbstractSensor<int16_t>& _sensor;
     AbstractActuator& _actuator;
 

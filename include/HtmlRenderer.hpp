@@ -2,20 +2,21 @@
 
 #include <iostream>
 
+#include <tinja.hpp>
+
 #include <AbstractActuator.hpp>
 #include <AbstractSensor.hpp>
-#include <Config.hpp>
+#include <ConfigRepository.hpp>
 #include <DeviceManager.hpp>
-#include <FileSystem.hpp>
-#include <Tinja.hpp>
+#include <FileDataSource.hpp>
 
 class HtmlRenderer {
 public:
-    HtmlRenderer(const Config& config,
+    HtmlRenderer(const ConfigRepository& config,
                  const AbstractSensor<int16_t>& sensor,
                  const AbstractActuator& actuator,
                  const DeviceManager& deviceManager,
-                 const FileSystem& fileSystem) :
+                 const FileDataSource& fileSystem) :
         _config(config),
         _sensor(sensor),
         _actuator(actuator),
@@ -94,11 +95,11 @@ private:
         return s;
     }
 
-    const Config& _config;
+    const ConfigRepository& _config;
     const AbstractSensor<int16_t>& _sensor;
     const AbstractActuator& _actuator;
     const DeviceManager& _deviceManager;
-    const FileSystem& _fileSystem;
+    const FileDataSource& _fileSystem;
 
     tinja::Template _templ;
     mutable tinja::DataMap _data;

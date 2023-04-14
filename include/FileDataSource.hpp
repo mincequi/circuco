@@ -1,22 +1,23 @@
-#ifndef FILESYSTEM_HPP
-#define FILESYSTEM_HPP
+#pragma once
 
+#include <iostream>
 #include <regex>
 #include <string>
 #include <LittleFS.h>
+#include <FileDataSourceInterface.hpp>
 
-class FileSystem {
+class FileDataSource : public FileDataSourceInterface {
 public:
-    FileSystem() {
+    FileDataSource() {
         if (!LittleFS.begin()) {
-            std::cerr << "FileSystem initialization failed." << std::endl;
+            std::cerr << "FileDataSource initialization failed." << std::endl;
         };
     }
 
-    ~FileSystem() {
+    ~FileDataSource() {
     }
 
-    std::string htmlTemplate() const {
+    std::string htmlTemplate() const override {
         auto _htmlTemplate = loadFile("circuco.html");
         std::cout << "HTML template minified from " << _htmlTemplate.size();
         // TODO: this causes an OOM
@@ -32,8 +33,12 @@ public:
         return _htmlTemplate;
     }
 
-    std::string css() const {
+    std::string css() const override {
         return loadFile("circuco.css");
+    }
+
+    std::string config() const override {
+        return loadFile("circuco.conf");
     }
 
 private:
@@ -44,5 +49,3 @@ private:
         return file.readString().c_str();
     }
 };
-
-#endif // FILESYSTEM_HPP

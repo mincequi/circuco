@@ -1,14 +1,15 @@
 #pragma once
 
+#include <any>
+
 #include <ESPAsyncWebServer.h>
 
-#include <Config.hpp>
-#include <FileSystem.hpp>
+#include <ConfigRepository.hpp>
 #include <HtmlRenderer.hpp>
 
 class HttpServer {
 public:
-    HttpServer(Config& config, HtmlRenderer& renderer, const FileSystem& fileSystem) :
+    HttpServer(ConfigRepository& config, HtmlRenderer& renderer, const FileDataSource& fileSystem) :
     _renderer(renderer),
     _fileSystem(fileSystem),
     _webServer(80) {
@@ -108,6 +109,6 @@ private:
     }
 
     HtmlRenderer& _renderer;
-    const FileSystem& _fileSystem;
+    const FileDataSource& _fileSystem;
     AsyncWebServer _webServer;
 };

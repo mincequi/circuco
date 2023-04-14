@@ -4,11 +4,14 @@
 
 class WifiManager {
 public:
-    WifiManager() {
+    WifiManager(const ConfigRepository& configRepository) :
+        _configRepository(configRepository) {
         WiFi.persistent(false);
         WiFi.mode(WIFI_STA);
-        _wifi.addAP("Kay-Ller", "Katha1203");
-        _wifi.addAP("Kay-Fi", "Katha1203");
+
+        for (const auto& ap : _configRepository.aps()) {
+            _wifi.addAP(ap.first.c_str(), ap.second.c_str());
+        }
     }
 
     ~WifiManager() {
@@ -29,6 +32,7 @@ public:
     }
 
 private:
+    const ConfigRepository& _configRepository;
     ESP8266WiFiMulti _wifi;
     bool _isConnected = false;
 };
