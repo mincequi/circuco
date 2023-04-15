@@ -23,11 +23,11 @@ public:
 
         // from-To
         _httpServer.on("/if", [&]() {
-            config.incrementFrom();
+            config.changeFrom(1);
             sendDocument();
         });
         _httpServer.on("/df", [&]() {
-            config.decrementFrom();
+            config.changeFrom(-1);
             sendDocument();
         });
         _httpServer.on("/it", [&]() {

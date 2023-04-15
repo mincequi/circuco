@@ -5,6 +5,7 @@
 #include <string>
 #include <LittleFS.h>
 #include <FileDataSourceInterface.hpp>
+#include <Overload.hpp>
 
 class FileDataSource : public FileDataSourceInterface {
 public:
@@ -41,6 +42,39 @@ public:
         return loadFile("circuco.conf");
     }
 
+    void beginSaveConfig() override {
+        _configFile = LittleFS.open("circuco.conf", "w");
+    }
+
+    void endSaveConfig() override {
+        _configFile.close();
+    }
+
+    void saveConfig(const ConfigType& v, bool newLine = false) override {
+        if (!_configFile) return;
+
+        std::visit(overloaded {
+            [&](int arg) {
+                if (newLine)
+                    _configFile.println(arg);
+                else
+                    _configFile.print(arg);
+            },
+            [&](float arg) {
+                if (newLine)
+                    _configFile.println(arg);
+                else
+                    _configFile.print(arg);
+            },
+            [&](const std::string& arg) {
+                if (newLine)
+                    _configFile.println(arg.c_str());
+                else
+                    _configFile.print(arg.c_str());
+            }
+        }, v);
+    }
+
 private:
     static std::string loadFile(const std::string& fileName) {
         File file = LittleFS.open(fileName.c_str(), "r");
@@ -48,4 +82,6 @@ private:
 
         return file.readString().c_str();
     }
+
+    File _configFile;
 };

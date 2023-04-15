@@ -23,47 +23,47 @@ public:
 
         // from-To
         _webServer.on("/if", [&](AsyncWebServerRequest *request) {
-            config.incrementFrom();
+            config.changeFrom(1);
             sendDocument(request);
         });
         _webServer.on("/df", [&](AsyncWebServerRequest *request) {
-            config.decrementFrom();
+            config.changeFrom(-1);
             sendDocument(request);
         });
         _webServer.on("/it", [&](AsyncWebServerRequest *request) {
-            config.incrementTo();
+            config.changeTo(1);
             sendDocument(request);
         });
         _webServer.on("/dt", [&](AsyncWebServerRequest *request) {
-            config.decrementTo();
+            config.changeTo(-1);
             sendDocument(request);
         });
 
         // duration-interval
         _webServer.on("/id", [&](AsyncWebServerRequest *request) {
-            config.incrementDuration();
+            config.changeDuration(1);
             sendDocument(request);
         });
         _webServer.on("/dd", [&](AsyncWebServerRequest *request) {
-            config.decrementDuration();
+            config.changeDuration(-1);
             sendDocument(request);
         });
         _webServer.on("/ii", [&](AsyncWebServerRequest *request) {
-            config.incrementInterval();
+            config.changeInterval(1);
             sendDocument(request);
         });
         _webServer.on("/di", [&](AsyncWebServerRequest *request) {
-            config.decrementInterval();
+            config.changeInterval(-1);
             sendDocument(request);
         });
 
         // rate-of-change
         _webServer.on("/ir", [&](AsyncWebServerRequest *request) {
-            config.incrementRoc();
+            config.changeRoc(0.1f);
             sendDocument(request);
         });
         _webServer.on("/dr", [&](AsyncWebServerRequest *request) {
-            config.decrementRoc();
+            config.changeRoc(-0.1f);
             sendDocument(request);
         });
 

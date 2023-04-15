@@ -9,6 +9,7 @@
 #include <tomlcpp.hpp>
 
 #include <FileDataSourceInterface.hpp>
+#include <Logger.hpp>
 #include <Util.hpp>
 
 // 00:00, 00:01, 00:02, 00:03, 00:04, 00:05, 00:06, 00:08,
@@ -24,6 +25,7 @@ static const std::vector<int> _durations = {
 
 static const int _maxDuration = _durations.size()-1;
 static const int _maxInterval = 27;
+static const int _durationIntervalOffset = 17;
 
 class ConfigRepository {
 public:
@@ -31,10 +33,17 @@ public:
 
     ConfigRepository(FileDataSourceInterface& fileSystem) :
         _fileSystem(fileSystem) {
-        load();
     }
 
     ~ConfigRepository() {
+    }
+
+    void setup() {
+        load();
+    }
+
+    void loop(uint ts) {
+        save();
     }
 
     const Aps& aps() const {
@@ -50,19 +59,19 @@ public:
     }
 
     std::string strDuration() const {
-        return toDuration(_durations.at(_duration), "On");
+        return toDuration(_durations.at(_dur), "On");
     }
 
     uint duration() const {
-        return _durations.at(_duration);
+        return _durations.at(_dur);
     }
 
     std::string strInterval() const {
-        return toDuration(_durations.at(_interval)*60, "Off");
+        return toDuration(_durations.at(_intvl)*60, "Off");
     }
 
     uint interval() const {
-        return _durations.at(_interval)*60;
+        return _durations.at(_intvl)*60;
     }
 
     std::string strRoc() const {
@@ -77,80 +86,113 @@ public:
         return _roc;
     }
 
-    void incrementFrom() {
-        _from = std::min(++_from, _to-1);
+    void changeFrom(int d) {
+        changeValue(&_from, d, 0, _to-1);
     }
 
-    void decrementFrom() {
-        _from = std::max(--_from, 0);
+    void changeTo(int d) {
+        changeValue(&_to, d, _from+1, 95);
     }
 
-    void incrementTo() {
-        _to = std::min(++_to, 95);
+    void changeDuration(int d) {
+        changeValue(&_dur, d, 0, std::min(_intvl+_durationIntervalOffset, _maxDuration));
     }
 
-    void decrementTo() {
-        _to = std::max(--_to, _from+1);
+    void changeInterval(int d) {
+        changeValue(&_intvl, d, std::max(_dur-_durationIntervalOffset, 0), _maxInterval);
     }
 
-    void incrementDuration() {
-        _duration = std::min( { ++_duration, _interval+17, _maxDuration } );
-    }
-
-    void decrementDuration() {
-        _duration = std::max(--_duration, 0);
-    }
-
-    void incrementInterval() {
-        _interval = std::min(++_interval, _maxInterval);
-    }
-
-    void decrementInterval() {
-        _interval = std::max( { --_interval, _duration-17, 0 } );
-    }
-
-    void incrementRoc() {
-        _roc = std::min(_roc+0.1f, 2.0f);
-    }
-
-    void decrementRoc() {
-        _roc = std::max(_roc-0.1f, 0.0f);
+    void changeRoc(float d) {
+        changeValue(&_roc, d, 0.0f, 2.0f);
     }
 
     static const size_t historySize = 60;
-    static const size_t loopInterval = 1000;
+    static const size_t deviceInterval = 1000;
+    static const size_t saveInterval = 10000;
 
 private:
+    template <typename T>
+    T changeValue(T* v, T d, T lo, T hi) {
+        const auto ret = std::clamp(*v+d, lo, hi);
+        if (*v != ret) _isDirty = true;
+        *v = ret;
+        return ret;
+    }
+
     void load() {
         // 1. parse file
-        auto res = toml::parse(_fileSystem.config());
+        const auto res = toml::parse(_fileSystem.config());
         if (!res.table) {
-            std::cerr << "ConfigRepository> cannot parse file: " << res.errmsg << std::endl;
+            LOG("file parsing failed: " << res.errmsg);
             return;
         }
 
         // 2. get aps array
-        auto apArray = res.table->getArray("aps");
+        const auto apArray = res.table->getArray("aps");
         if (!apArray) {
-            std::cerr << "ConfigRepository> missing [aps]" << std::endl;
+            LOG("access points missing");
             return;
         }
 
-        // 4. examine the values
+        // 2.1 examine ap values
         for (int i = 0; ; i++) {
-            auto ap = apArray->getTable(i);
+            const auto ap = apArray->getTable(i);
             if (!ap) break;
 
-            auto[ssidOk, ssid] = ap->getString("ssid");
-            auto[passwordOk, password] = ap->getString("password");
+            const auto[ssidOk, ssid] = ap->getString("ssid");
+            const auto[passwordOk, password] = ap->getString("password");
             if (!ssidOk || !passwordOk) continue;
 
             _aps.push_back({ ssid, password });
         }
+
+        // 3. Other values
+        const auto[ok, from] = res.table->getInt("from");
+        if (ok) _from = from;
+        const auto[toOk, to] = res.table->getInt("to");
+        if (toOk) _to = to;
+        const auto[durOk, dur] = res.table->getInt("dur");
+        if (durOk) _dur = dur;
+        const auto[intvlOk, intvl] = res.table->getInt("intvl");
+        if (intvlOk) _intvl = intvl;
+        const auto[rocOk, roc] = res.table->getDouble("roc");
+        if (rocOk) _roc = roc;
     }
 
     void save() {
-        
+        if (!_isDirty) return;
+
+        LOG("saving config");
+        _fileSystem.beginSaveConfig();
+
+        if (!_aps.empty()) {
+            _fileSystem.saveConfig("aps = [", true);
+            for (size_t i = 0; i < _aps.size(); ++i) {
+                _fileSystem.saveConfig("  { ssid = \"");
+                _fileSystem.saveConfig(_aps.at(i).first);
+                _fileSystem.saveConfig("\", password = \"");
+                _fileSystem.saveConfig(_aps.at(i).second);
+                _fileSystem.saveConfig("\" }");
+                if (i + 1 < _aps.size()) _fileSystem.saveConfig(",");
+                _fileSystem.saveConfig("", true);
+            }
+            _fileSystem.saveConfig("]", true);
+        }
+
+        _fileSystem.saveConfig("from = ");
+        _fileSystem.saveConfig(_from, true);
+        _fileSystem.saveConfig("to = ");
+        _fileSystem.saveConfig(_to, true);
+        _fileSystem.saveConfig("dur = ");
+        _fileSystem.saveConfig(_dur, true);
+        _fileSystem.saveConfig("intvl = ");
+        _fileSystem.saveConfig(_intvl, true);
+        _fileSystem.saveConfig("roc = ");
+        _fileSystem.saveConfig(_roc, true);
+
+        _fileSystem.endSaveConfig();
+
+        _isDirty = false;
     }
 
     FileDataSourceInterface& _fileSystem;
@@ -161,7 +203,7 @@ private:
     int _from = 24;     // 06:00
     int _to = 72;       // 18:00
     //int _duration = 19; // 03:00m
-    int _duration = 1; // 00:01m
-    int _interval = 14; // 01:00h
+    int _dur = 1; // 00:01m
+    int _intvl = 14; // 01:00h
     float _roc = 2.0f;
 };
