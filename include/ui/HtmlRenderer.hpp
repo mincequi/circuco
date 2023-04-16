@@ -4,15 +4,13 @@
 
 #include <tinja.hpp>
 
-#include <AbstractActuator.hpp>
-#include <AbstractSensor.hpp>
-#include <ConfigRepository.hpp>
-#include <DeviceManager.hpp>
+#include <Config.hpp>
 #include <FileDataSource.hpp>
+#include <io/DeviceManager.hpp>
 
 class HtmlRenderer {
 public:
-    HtmlRenderer(const ConfigRepository& config,
+    HtmlRenderer(const Config& config,
                  const AbstractSensor<int16_t>& sensor,
                  const AbstractActuator& actuator,
                  const DeviceManager& deviceManager,
@@ -95,7 +93,7 @@ private:
         return s;
     }
 
-    const ConfigRepository& _config;
+    const Config& _config;
     const AbstractSensor<int16_t>& _sensor;
     const AbstractActuator& _actuator;
     const DeviceManager& _deviceManager;

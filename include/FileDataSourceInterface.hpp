@@ -13,7 +13,7 @@ public:
 
     virtual std::string config() const = 0;
 
-    virtual void beginSaveConfig() = 0;
-    virtual void endSaveConfig() = 0;
-    virtual void saveConfig(const ConfigType& v, bool newLine = false) = 0;
+    virtual void beginSaveConfig() {};
+    virtual void endSaveConfig() {};
+    virtual void saveConfig(const ConfigType& v, bool newLine = false) {};
 };

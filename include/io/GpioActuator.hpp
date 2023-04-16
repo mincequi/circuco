@@ -1,12 +1,9 @@
-#ifndef GPIOACTUATOR_HPP
-#define GPIOACTUATOR_HPP
+#pragma once
 
-#include <AbstractActuator.hpp>
+#include "AbstractActuator.hpp"
 
 class GpioActuator : public AbstractActuator {
 protected:
     virtual void doSetActive(bool active) const override {
     }
 };
-
-#endif // GPIOACTUATOR_HPP

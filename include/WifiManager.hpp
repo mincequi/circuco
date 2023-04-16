@@ -2,14 +2,16 @@
 
 #include <ESP8266WiFiMulti.h>
 
+#include "Config.hpp"
+
 class WifiManager {
 public:
-    WifiManager(const ConfigRepository& configRepository) :
-        _configRepository(configRepository) {
+    WifiManager(const Config& config) :
+        _config(config) {
         WiFi.persistent(false);
         WiFi.mode(WIFI_STA);
 
-        for (const auto& ap : _configRepository.aps()) {
+        for (const auto& ap : _config.aps()) {
             _wifi.addAP(ap.first.c_str(), ap.second.c_str());
         }
     }
@@ -32,7 +34,7 @@ public:
     }
 
 private:
-    const ConfigRepository& _configRepository;
+    const Config& _config;
     ESP8266WiFiMulti _wifi;
     bool _isConnected = false;
 };

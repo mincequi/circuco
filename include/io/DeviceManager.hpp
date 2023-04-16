@@ -1,14 +1,14 @@
 #pragma once
 
-#include <AbstractActuator.hpp>
-#include <AbstractSensor.hpp>
-#include <ConfigRepository.hpp>
+#include "AbstractActuator.hpp"
+#include "AbstractSensor.hpp"
+#include <Config.hpp>
 
 #include <deque>
 
 class DeviceManager {
 public:
-    DeviceManager(const ConfigRepository& config,
+    DeviceManager(const Config& config,
                   AbstractSensor<int16_t>& sensor,
                   AbstractActuator& actuator) :
         _config(config),
@@ -52,7 +52,7 @@ public:
     }
 
 private:
-    const ConfigRepository& _config;
+    const Config& _config;
     AbstractSensor<int16_t>& _sensor;
     AbstractActuator& _actuator;
 

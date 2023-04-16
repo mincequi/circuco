@@ -4,12 +4,12 @@
 
 #include <ESPAsyncWebServer.h>
 
-#include <ConfigRepository.hpp>
-#include <HtmlRenderer.hpp>
+#include <Config.hpp>
+#include <ui/HtmlRenderer.hpp>
 
 class HttpServer {
 public:
-    HttpServer(ConfigRepository& config, HtmlRenderer& renderer, const FileDataSource& fileSystem) :
+    HttpServer(Config& config, HtmlRenderer& renderer, const FileDataSource& fileSystem) :
     _renderer(renderer),
     _fileSystem(fileSystem),
     _webServer(80) {
@@ -19,6 +19,9 @@ public:
         });
         _webServer.on("/circuco.css", [&](AsyncWebServerRequest *request) {
             request->send(200, "text/css", _fileSystem.css().c_str());
+        });
+        _webServer.on("/circuco.conf", [&](AsyncWebServerRequest *request) {
+            request->send(200, "text/plain", _fileSystem.config().c_str());
         });
 
         // from-To

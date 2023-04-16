@@ -1,9 +1,4 @@
-#ifndef ABSTRACTACTUATOR_HPP
-#define ABSTRACTACTUATOR_HPP
-
-#include <array>
-#include <deque>
-#include <string>
+#pragma once
 
 class AbstractActuator {
 public:
@@ -37,5 +32,3 @@ private:
     bool _isActive = false;
     uint _activeUntilMs = 0;
 };
-
-#endif // ABSTRACTACTUATOR_HPP

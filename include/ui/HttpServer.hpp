@@ -1,15 +1,14 @@
 #pragma once
 
-#define DEBUG_ESP_HTTP_SERVER
 #include <ESP8266WebServer.h>
 
 #include <Config.hpp>
-#include <FileSystem.hpp>
-#include <HtmlRenderer.hpp>
+#include <FileDataSource.hpp>
+#include <ui/HtmlRenderer.hpp>
 
 class HttpServer {
 public:
-    HttpServer(ConfigRepository& config, const HtmlRenderer& renderer, const FileDataSource& fileSystem) :
+    HttpServer(Config& config, const HtmlRenderer& renderer, const FileDataSource& fileSystem) :
     _renderer(renderer),
     _fileSystem(fileSystem),
     _httpServer(80) {
@@ -31,39 +30,39 @@ public:
             sendDocument();
         });
         _httpServer.on("/it", [&]() {
-            config.incrementTo();
+            config.changeTo(1);
             sendDocument();
         });
         _httpServer.on("/dt", [&]() {
-            config.decrementTo();
+            config.changeTo(-1);
             sendDocument();
         });
 
         // duration-interval
         _httpServer.on("/id", [&]() {
-            config.incrementDuration();
+            config.changeDuration(1);
             sendDocument();
         });
         _httpServer.on("/dd", [&]() {
-            config.decrementDuration();
+            config.changeDuration(-1);
             sendDocument();
         });
         _httpServer.on("/ii", [&]() {
-            config.incrementInterval();
+            config.changeInterval(1);
             sendDocument();
         });
         _httpServer.on("/di", [&]() {
-            config.decrementInterval();
+            config.changeInterval(-1);
             sendDocument();
         });
 
         // rate-of-change
         _httpServer.on("/ir", [&]() {
-            config.incrementRoc();
+            config.changeRoc(0.1);
             sendDocument();
         });
         _httpServer.on("/dr", [&]() {
-            config.decrementRoc();
+            config.changeRoc(-0.1);
             sendDocument();
         });
 

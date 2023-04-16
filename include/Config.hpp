@@ -27,15 +27,15 @@ static const int _maxDuration = _durations.size()-1;
 static const int _maxInterval = 27;
 static const int _durationIntervalOffset = 17;
 
-class ConfigRepository {
+class Config {
 public:
     using Aps = std::vector<std::pair<std::string, std::string>>;
 
-    ConfigRepository(FileDataSourceInterface& fileSystem) :
+    Config(FileDataSourceInterface& fileSystem) :
         _fileSystem(fileSystem) {
     }
 
-    ~ConfigRepository() {
+    ~Config() {
     }
 
     void setup() {

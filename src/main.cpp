@@ -1,19 +1,20 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 
-#include <DeviceManager.hpp>
-#include <GpioActuator.hpp>
-#include <HtmlRenderer.hpp>
 #include <Logger.hpp>
-//#include <HttpServer.hpp>
-#include <AsyncHttpServer.hpp>
-#include <TemperatureSensorDs18b20.hpp>
 #include <WifiManager.hpp>
+#include <ui/HtmlRenderer.hpp>
+
+#include <io/DeviceManager.hpp>
+#include <io/GpioActuator.hpp>
+#include <io/TemperatureSensorDs18b20.hpp>
+//#include <ui/HttpServer.hpp>
+#include <ui/HttpServerAsync.hpp>
 
 TemperatureSensorDs18b20 sensor;
 GpioActuator actuator;
 FileDataSource fileDataSource;
-ConfigRepository configRepository(fileDataSource);
+Config config(fileDataSource);
 // Since i experienced OOM exception after a while, I moved the following objects on the heap.
 // This is was the ESP8266 doc tells me:
 // https://arduino-esp8266.readthedocs.io/en/latest/faq/a02-my-esp-crashes.html#other-causes-for-crashes
@@ -25,50 +26,47 @@ std::unique_ptr<HtmlRenderer> htmlRenderer;
 std::unique_ptr<HttpServer> httpServer;
 
 void setup() {
-    // Configure time for Germany
-    configTime("CET-1CEST,M3.5.0/02,M10.5.0/3", "de.pool.ntp.org");
-
     // Config output
     Serial.begin(115200);
     LOG("setup");
+    pinMode(LED_BUILTIN, OUTPUT);
+
+    // Configure time for Germany
+    configTime("CET-1CEST,M3.5.0/02,M10.5.0/3", "de.pool.ntp.org");
+
+    wifiManager = std::make_unique<WifiManager>(config);
+    deviceManager = std::make_unique<DeviceManager>(config, sensor, actuator);
+    htmlRenderer = std::make_unique<HtmlRenderer>(config, sensor, actuator, *deviceManager, fileDataSource);
+    httpServer = std::make_unique<HttpServer>(config, *htmlRenderer, fileDataSource);
 
     // Setup our components
     sensor.setup();
-    configRepository.setup();
-
-    wifiManager = std::make_unique<WifiManager>(configRepository);
-    deviceManager = std::make_unique<DeviceManager>(configRepository, sensor, actuator);
-    htmlRenderer = std::make_unique<HtmlRenderer>(configRepository, sensor, actuator, *deviceManager, fileDataSource);
-    httpServer = std::make_unique<HttpServer>(configRepository, *htmlRenderer, fileDataSource);
-
+    config.setup();
     wifiManager->connect();
     htmlRenderer->setup();
-
-    pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
     if (!wifiManager->isConnected()) {
         wifiManager->connect();
-        //std::cout << "Connecting to WiFi" << std::endl;
     }
-
-    //std::cout << "loop" << std::endl;
 
     // Check if we want to update devices
     static uint _lastDevicePoll = 0;
     static uint _lastSavePoll = 0;
     const auto now = millis();
+
+    // TODO: comment this for WIFFI pump
     digitalWrite(LED_BUILTIN, HIGH);
 
-    if (_lastDevicePoll + configRepository.deviceInterval < now) {
+    if (_lastDevicePoll + config.deviceInterval < now) {
+        // TODO: comment this for WIFFI pump
         digitalWrite(LED_BUILTIN, LOW);
         _lastDevicePoll = now;
         deviceManager->loop(now);
-        //std::cout << "poll" << std::endl;
-    } else if (_lastSavePoll + configRepository.saveInterval < now) {
+    } else if (_lastSavePoll + config.saveInterval < now) {
         _lastSavePoll = now;
-        configRepository.loop(now);
+        config.loop(now);
     }
 
   // turn the LED on (HIGH is the voltage level)
