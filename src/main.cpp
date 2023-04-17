@@ -7,6 +7,7 @@
 #include <io/FileSystem.hpp>
 #include <io/ActuatorGpio.hpp>
 #include <io/SensorTemperatureDs18b20.hpp>
+#include <io/Time.hpp>
 #include <ui/HtmlRenderer.hpp>
 //#include <ui/HttpServer.hpp>
 #include <ui/HttpServerAsync.hpp>
@@ -15,7 +16,9 @@
 SensorTemperatureDs18b20 sensor;
 ActuatorGpio actuator;
 FileSystem fileSystem;
-Config config(fileSystem);
+Time _time;
+Config config(fileSystem, _time);
+
 // Since i experienced OOM exception after a while, I moved the following objects on the heap.
 // This is was the ESP8266 doc tells me:
 // https://arduino-esp8266.readthedocs.io/en/latest/faq/a02-my-esp-crashes.html#other-causes-for-crashes
@@ -44,7 +47,7 @@ void setup() {
     // Create heap components
     wifiManager = std::make_unique<WifiManager>(config);
     deviceManager = std::make_unique<DeviceManager>(config, sensor, actuator);
-    htmlRenderer = std::make_unique<HtmlRenderer>(config, sensor, actuator, *deviceManager, fileSystem);
+    htmlRenderer = std::make_unique<HtmlRenderer>(config, sensor, actuator, *deviceManager, fileSystem, _time);
     httpServer = std::make_unique<HttpServer>(config, *htmlRenderer, fileSystem);
 
     // Setup heap components
@@ -69,6 +72,7 @@ void loop() {
         // TODO: comment this for WIFFI pump
         digitalWrite(LED_BUILTIN, LOW);
         _lastDevicePoll = now;
+        _time.loop();
         deviceManager->loop(now);
     } else if (_lastSavePoll + config.saveInterval < now) {
         _lastSavePoll = now;

@@ -15,12 +15,14 @@ public:
                  const SensorBase<int16_t>& sensor,
                  const ActuatorBase& actuator,
                  const DeviceManager& deviceManager,
-                 const FileSystemBase& fileSystem) :
+                 const FileSystemBase& fileSystem,
+                 const TimeBase& time) :
         _config(config),
         _sensor(sensor),
         _actuator(actuator),
         _deviceManager(deviceManager),
-        _fileSystem(fileSystem) {
+        _fileSystem(fileSystem),
+        _time(time) {
     }
 
     ~HtmlRenderer() {
@@ -31,9 +33,10 @@ public:
         std::cout << "HTML template tokenized to " << tokenCount << " tokens" << std::endl;
     }
 
-    void render() {
-        _data["tm"] = time();
+    void render() const {
+        _data["tm"] = _time.strTime();
 
+        _data["up"] = std::to_string(_config.daysUp());
         _data["f"] = _config.strFrom();
         _data["t"] = _config.strTo();
         _data["d"] = _config.strDuration();
@@ -99,6 +102,7 @@ private:
     const ActuatorBase& _actuator;
     const DeviceManager& _deviceManager;
     const FileSystemBase& _fileSystem;
+    const TimeBase& _time;
 
     tinja::Template _templ;
     mutable tinja::DataMap _data;

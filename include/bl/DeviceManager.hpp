@@ -21,10 +21,10 @@ public:
 
     auto loop(uint ts) {
         _sensor.loop(ts);
-        if (_sensor.roc() >= _config.roc()) {
+        if ((_sensor.roc() >= _config.roc()) && _config.isEnabled()) {
             // Pump gets activated due to ROC
             _actuator.setActive(ts);
-        } else if (_actuator.lastActiveSinceTsMs() + _config.intervalMs() <= ts) {
+        } else if ((_actuator.lastActiveSinceTsMs() + _config.intervalMs() <= ts)  && _config.isEnabled()) {
             // Pump gets activated due to timer interval
             _actuator.setActive(ts);
         } else if (_actuator.lastActiveSinceTsMs() + _config.durationMs() <= ts) {

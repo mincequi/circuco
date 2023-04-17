@@ -7,6 +7,7 @@
 #include <Logger.hpp>
 #include <Util.hpp>
 #include <io/FileSystemBase.hpp>
+#include <io/TimeBase.hpp>
 
 // 00:00, 00:01, 00:02, 00:03, 00:04, 00:05, 00:06, 00:08,
 // 00:10, 00:12, 00:15, 00:20, 00:25, 00:30, 00:40, 00:50,
@@ -27,8 +28,9 @@ class Config {
 public:
     using Aps = std::vector<std::pair<std::string, std::string>>;
 
-    Config(FileSystemBase& fileSystem) :
-        _fileSystem(fileSystem) {
+    Config(FileSystemBase& fileSystem, const TimeBase& time) :
+        _fileSystem(fileSystem),
+        _time(time) {
     }
 
     ~Config() {
@@ -39,6 +41,7 @@ public:
     }
 
     void loop(uint ts) {
+        _daysUp = ts / 1000 / 60 / 60 / 24;
         save();
     }
 
@@ -52,6 +55,10 @@ public:
 
     std::string strTo() const {
         return toTime(_to*15);
+    }
+
+    bool isEnabled() const {
+        return _time.time() >= _from*15 && _time.time() < _to*15;
     }
 
     std::string strDuration() const {
@@ -100,6 +107,10 @@ public:
 
     void changeRoc(float d) {
         changeValue(&_roc, d, 0.0f, 2.0f);
+    }
+
+    int daysUp() const {
+        return _daysUp;
     }
 
     static const size_t historySize = 60;
@@ -195,6 +206,9 @@ private:
     }
 
     FileSystemBase& _fileSystem;
+    const TimeBase& _time;
+    
+    int _daysUp = 0;
     Aps _aps;
 
     bool _isDirty = false;

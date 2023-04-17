@@ -1,6 +1,7 @@
 #include <unity.h>
 
 #include <bl/Config.hpp>
+#include <io/TimeBase.hpp>
 
 class FileSystemMock : public FileSystemBase {
     virtual std::string htmlTemplate() const override {};
@@ -13,8 +14,15 @@ class FileSystemMock : public FileSystemBase {
     }
 };
 
+class TimeMock : public TimeBase {
+    virtual void doLoop() override {
+    }
+};
+
 FileSystemMock fileSystemMock;
-Config cut(fileSystemMock);
+TimeMock timeMock;
+
+Config cut(fileSystemMock, timeMock);
 
 void setUp(void) {
     cut.setup();
