@@ -1,8 +1,8 @@
 #include <unity.h>
 
-#include <Config.hpp>
+#include <bl/Config.hpp>
 
-class FileDataSourceMock : public FileDataSourceInterface {
+class FileSystemMock : public FileSystemBase {
     virtual std::string htmlTemplate() const override {};
     virtual std::string css() const override {};
     virtual std::string config() const override {
@@ -13,8 +13,8 @@ class FileDataSourceMock : public FileDataSourceInterface {
     }
 };
 
-FileDataSourceMock fileDataSourceMock;
-Config cut(fileDataSourceMock);
+FileSystemMock fileSystemMock;
+Config cut(fileSystemMock);
 
 void setUp(void) {
     cut.setup();

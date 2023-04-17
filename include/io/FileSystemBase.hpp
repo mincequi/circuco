@@ -3,7 +3,7 @@
 #include <string>
 #include <variant>
 
-class FileDataSourceInterface {
+class FileSystemBase {
 public:
     using ConfigType = std::variant<int, float, std::string>;
 
@@ -13,7 +13,7 @@ public:
 
     virtual std::string config() const = 0;
 
-    virtual void beginSaveConfig() {};
-    virtual void endSaveConfig() {};
-    virtual void saveConfig(const ConfigType& v, bool newLine = false) {};
+    virtual void beginWriteConfig() {};
+    virtual void endWriteConfig() {};
+    virtual void writeConfig(const ConfigType& v, bool newLine = false) {};
 };

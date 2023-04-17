@@ -1,20 +1,21 @@
 #pragma once
 
 #include <iostream>
+#include <map>
 
 #include <tinja.hpp>
 
-#include <Config.hpp>
-#include <FileDataSource.hpp>
-#include <io/DeviceManager.hpp>
+#include <bl/Config.hpp>
+#include <bl/DeviceManager.hpp>
+#include <io/FileSystemBase.hpp>
 
 class HtmlRenderer {
 public:
     HtmlRenderer(const Config& config,
-                 const AbstractSensor<int16_t>& sensor,
-                 const AbstractActuator& actuator,
+                 const SensorBase<int16_t>& sensor,
+                 const ActuatorBase& actuator,
                  const DeviceManager& deviceManager,
-                 const FileDataSource& fileSystem) :
+                 const FileSystemBase& fileSystem) :
         _config(config),
         _sensor(sensor),
         _actuator(actuator),
@@ -94,10 +95,10 @@ private:
     }
 
     const Config& _config;
-    const AbstractSensor<int16_t>& _sensor;
-    const AbstractActuator& _actuator;
+    const SensorBase<int16_t>& _sensor;
+    const ActuatorBase& _actuator;
     const DeviceManager& _deviceManager;
-    const FileDataSource& _fileSystem;
+    const FileSystemBase& _fileSystem;
 
     tinja::Template _templ;
     mutable tinja::DataMap _data;

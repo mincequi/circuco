@@ -1,16 +1,17 @@
 #pragma once
 
-#include "AbstractActuator.hpp"
-#include "AbstractSensor.hpp"
-#include <Config.hpp>
-
 #include <deque>
+
+#include <io/ActuatorBase.hpp>
+#include <io/SensorBase.hpp>
+
+#include "Config.hpp"
 
 class DeviceManager {
 public:
     DeviceManager(const Config& config,
-                  AbstractSensor<int16_t>& sensor,
-                  AbstractActuator& actuator) :
+                  SensorBase<int16_t>& sensor,
+                  ActuatorBase& actuator) :
         _config(config),
         _sensor(sensor),
         _actuator(actuator) {
@@ -20,11 +21,15 @@ public:
 
     auto loop(uint ts) {
         _sensor.loop(ts);
-        _actuator.loop(ts);
         if (_sensor.roc() >= _config.roc()) {
-            _actuator.setActive(ts + _config.duration() * 1000);
-        } else if (_actuator.lastActiveUntilMs() + (_config.interval() - _config.duration()) * 1000 <= ts) {
-            _actuator.setActive(ts + _config.duration() * 1000);
+            // Pump gets activated due to ROC
+            _actuator.setActive(ts);
+        } else if (_actuator.lastActiveSinceTsMs() + _config.intervalMs() <= ts) {
+            // Pump gets activated due to timer interval
+            _actuator.setActive(ts);
+        } else if (_actuator.lastActiveSinceTsMs() + _config.durationMs() <= ts) {
+            // Pump gets deactivared due to duration
+            _actuator.setActive(0, false);
         }
 
         _sensorHistory.push_back(_sensor.value());
@@ -53,8 +58,8 @@ public:
 
 private:
     const Config& _config;
-    AbstractSensor<int16_t>& _sensor;
-    AbstractActuator& _actuator;
+    SensorBase<int16_t>& _sensor;
+    ActuatorBase& _actuator;
 
     std::deque<int16_t> _sensorHistory;
     std::deque<bool> _actuatorHistory;

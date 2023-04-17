@@ -2,13 +2,13 @@
 
 #include <ESP8266WebServer.h>
 
-#include <Config.hpp>
-#include <FileDataSource.hpp>
+#include <bl/Config.hpp>
+#include <io/FileSystemBase.hpp>
 #include <ui/HtmlRenderer.hpp>
 
 class HttpServer {
 public:
-    HttpServer(Config& config, const HtmlRenderer& renderer, const FileDataSource& fileSystem) :
+    HttpServer(Config& config, const HtmlRenderer& renderer, const FileSystemBase& fileSystem) :
     _renderer(renderer),
     _fileSystem(fileSystem),
     _httpServer(80) {
@@ -88,6 +88,6 @@ private:
     }
 
     const HtmlRenderer& _renderer;
-    const FileDataSource& _fileSystem;
+    const FileSystemBase& _fileSystem;
     ESP8266WebServer _httpServer;
 };

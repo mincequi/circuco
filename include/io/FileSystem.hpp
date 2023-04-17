@@ -4,18 +4,19 @@
 #include <regex>
 #include <string>
 #include <LittleFS.h>
-#include <FileDataSourceInterface.hpp>
 #include <Util.hpp>
 
-class FileDataSource : public FileDataSourceInterface {
+#include "FileSystemBase.hpp"
+
+class FileSystem : public FileSystemBase {
 public:
-    FileDataSource() {
+    FileSystem() {
         if (!LittleFS.begin()) {
-            std::cerr << "FileDataSource initialization failed." << std::endl;
+            std::cerr << "FileSystem initialization failed." << std::endl;
         };
     }
 
-    ~FileDataSource() {
+    ~FileSystem() {
     }
 
     std::string htmlTemplate() const override {
@@ -42,15 +43,15 @@ public:
         return loadFile("circuco.conf");
     }
 
-    void beginSaveConfig() override {
+    void beginWriteConfig() override {
         _configFile = LittleFS.open("circuco.conf", "w");
     }
 
-    void endSaveConfig() override {
+    void endWriteConfig() override {
         _configFile.close();
     }
 
-    void saveConfig(const ConfigType& v, bool newLine = false) override {
+    void writeConfig(const ConfigType& v, bool newLine = false) override {
         if (!_configFile) return;
 
         std::visit(overloaded {

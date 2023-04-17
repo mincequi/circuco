@@ -1,8 +1,8 @@
 #pragma once
 
-#include "AbstractActuator.hpp"
+#include "ActuatorBase.hpp"
 
-class GpioActuator : public AbstractActuator {
+class ActuatorGpio : public ActuatorBase {
 protected:
     virtual void doSetActive(bool active) const override {
     }

@@ -1,16 +1,12 @@
 #pragma once
 
-#include <chrono>
-#include <iostream>
-#include <sstream>
-#include <stdint.h>
-#include <vector>
+#include <algorithm>
 
 #include <tomlcpp.hpp>
 
-#include <FileDataSourceInterface.hpp>
 #include <Logger.hpp>
 #include <Util.hpp>
+#include <io/FileSystemBase.hpp>
 
 // 00:00, 00:01, 00:02, 00:03, 00:04, 00:05, 00:06, 00:08,
 // 00:10, 00:12, 00:15, 00:20, 00:25, 00:30, 00:40, 00:50,
@@ -31,7 +27,7 @@ class Config {
 public:
     using Aps = std::vector<std::pair<std::string, std::string>>;
 
-    Config(FileDataSourceInterface& fileSystem) :
+    Config(FileSystemBase& fileSystem) :
         _fileSystem(fileSystem) {
     }
 
@@ -62,16 +58,16 @@ public:
         return toDuration(_durations.at(_dur), "On");
     }
 
-    uint duration() const {
-        return _durations.at(_dur);
+    int durationMs() const {
+        return _durations.at(_dur) * 1000;
     }
 
     std::string strInterval() const {
         return toDuration(_durations.at(_intvl)*60, "Off");
     }
 
-    uint interval() const {
-        return _durations.at(_intvl)*60;
+    int intervalMs() const {
+        return _durations.at(_intvl)*60000;
     }
 
     std::string strRoc() const {
@@ -108,7 +104,7 @@ public:
 
     static const size_t historySize = 60;
     static const size_t deviceInterval = 1000;
-    static const size_t saveInterval = 10000;
+    static const size_t saveInterval = 60000;
 
 private:
     template <typename T>
@@ -157,45 +153,48 @@ private:
         if (intvlOk) _intvl = intvl;
         const auto[rocOk, roc] = res.table->getDouble("roc");
         if (rocOk) _roc = roc;
+
+        LOG("loaded");
     }
 
     void save() {
         if (!_isDirty) return;
 
-        LOG("saving config");
-        _fileSystem.beginSaveConfig();
+        _fileSystem.beginWriteConfig();
 
         if (!_aps.empty()) {
-            _fileSystem.saveConfig("aps = [", true);
+            _fileSystem.writeConfig("aps = [", true);
             for (size_t i = 0; i < _aps.size(); ++i) {
-                _fileSystem.saveConfig("  { ssid = \"");
-                _fileSystem.saveConfig(_aps.at(i).first);
-                _fileSystem.saveConfig("\", password = \"");
-                _fileSystem.saveConfig(_aps.at(i).second);
-                _fileSystem.saveConfig("\" }");
-                if (i + 1 < _aps.size()) _fileSystem.saveConfig(",");
-                _fileSystem.saveConfig("", true);
+                _fileSystem.writeConfig("  { ssid = \"");
+                _fileSystem.writeConfig(_aps.at(i).first);
+                _fileSystem.writeConfig("\", password = \"");
+                _fileSystem.writeConfig(_aps.at(i).second);
+                _fileSystem.writeConfig("\" }");
+                if (i + 1 < _aps.size()) _fileSystem.writeConfig(",");
+                _fileSystem.writeConfig("", true);
             }
-            _fileSystem.saveConfig("]", true);
+            _fileSystem.writeConfig("]", true);
         }
 
-        _fileSystem.saveConfig("from = ");
-        _fileSystem.saveConfig(_from, true);
-        _fileSystem.saveConfig("to = ");
-        _fileSystem.saveConfig(_to, true);
-        _fileSystem.saveConfig("dur = ");
-        _fileSystem.saveConfig(_dur, true);
-        _fileSystem.saveConfig("intvl = ");
-        _fileSystem.saveConfig(_intvl, true);
-        _fileSystem.saveConfig("roc = ");
-        _fileSystem.saveConfig(_roc, true);
+        _fileSystem.writeConfig("from = ");
+        _fileSystem.writeConfig(_from, true);
+        _fileSystem.writeConfig("to = ");
+        _fileSystem.writeConfig(_to, true);
+        _fileSystem.writeConfig("dur = ");
+        _fileSystem.writeConfig(_dur, true);
+        _fileSystem.writeConfig("intvl = ");
+        _fileSystem.writeConfig(_intvl, true);
+        _fileSystem.writeConfig("roc = ");
+        _fileSystem.writeConfig(_roc, true);
 
-        _fileSystem.endSaveConfig();
+        _fileSystem.endWriteConfig();
 
         _isDirty = false;
+
+        LOG("saved");
     }
 
-    FileDataSourceInterface& _fileSystem;
+    FileSystemBase& _fileSystem;
     Aps _aps;
 
     bool _isDirty = false;

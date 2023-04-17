@@ -4,12 +4,12 @@
 
 #include <ESPAsyncWebServer.h>
 
-#include <Config.hpp>
+#include <bl/Config.hpp>
 #include <ui/HtmlRenderer.hpp>
 
 class HttpServer {
 public:
-    HttpServer(Config& config, HtmlRenderer& renderer, const FileDataSource& fileSystem) :
+    HttpServer(Config& config, HtmlRenderer& renderer, const FileSystemBase& fileSystem) :
     _renderer(renderer),
     _fileSystem(fileSystem),
     _webServer(80) {
@@ -20,9 +20,11 @@ public:
         _webServer.on("/circuco.css", [&](AsyncWebServerRequest *request) {
             request->send(200, "text/css", _fileSystem.css().c_str());
         });
-        _webServer.on("/circuco.conf", [&](AsyncWebServerRequest *request) {
-            request->send(200, "text/plain", _fileSystem.config().c_str());
-        });
+
+        // TODO: comment this for release
+        // _webServer.on("/circuco.conf", [&](AsyncWebServerRequest *request) {
+        //     request->send(200, "text/plain", _fileSystem.config().c_str());
+        // });
 
         // from-To
         _webServer.on("/if", [&](AsyncWebServerRequest *request) {
@@ -112,6 +114,6 @@ private:
     }
 
     HtmlRenderer& _renderer;
-    const FileDataSource& _fileSystem;
+    const FileSystemBase& _fileSystem;
     AsyncWebServer _webServer;
 };

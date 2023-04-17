@@ -7,7 +7,7 @@
 #include <string>
 
 template<class T>
-class AbstractSensor {
+class SensorBase {
 public:
     void setup() {
         doSetup();    

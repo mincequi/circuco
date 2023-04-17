@@ -12,6 +12,7 @@ public:
         WiFi.mode(WIFI_STA);
 
         for (const auto& ap : _config.aps()) {
+            LOG("add AP: " << ap.first);
             _wifi.addAP(ap.first.c_str(), ap.second.c_str());
         }
     }
@@ -23,7 +24,7 @@ public:
         return _isConnected;
     }
 
-    void connect() {
+    void setup() {
         if (_wifi.run() == WL_CONNECTED) {
             Serial.print("WiFi connected: ");
             Serial.print(WiFi.SSID());

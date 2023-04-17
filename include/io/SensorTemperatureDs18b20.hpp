@@ -1,13 +1,13 @@
 #pragma once
 
-#include "AbstractSensor.hpp"
+#include "SensorBase.hpp"
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-class TemperatureSensorDs18b20 : public AbstractSensor<int16_t> {
+class SensorTemperatureDs18b20 : public SensorBase<int16_t> {
 public:
-    TemperatureSensorDs18b20() :
+    SensorTemperatureDs18b20() :
         _oneWire(D5),
         _sensor(&_oneWire) {
         _sensor.setWaitForConversion(false);
