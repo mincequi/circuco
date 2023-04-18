@@ -5,18 +5,20 @@
 #include <ESPAsyncWebServer.h>
 
 #include <bl/Config.hpp>
-#include <ui/HtmlRenderer.hpp>
+
+#include "HtmlRendererBase.hpp"
 
 class HttpServer {
 public:
-    HttpServer(Config& config, HtmlRenderer& renderer, const FileSystemBase& fileSystem) :
-    _renderer(renderer),
+    HttpServer(Config& config, HtmlRendererBase& renderer, const FileSystemBase& fileSystem) :
+    _htmlRenderer(renderer),
     _fileSystem(fileSystem),
     _webServer(80) {
 
-    _webServer.on("/", [&](AsyncWebServerRequest *request) {
-            sendDocument(request);
+        _webServer.on("/", [&](AsyncWebServerRequest *request) {
+            sendDocument(request, _htmlRenderer);
         });
+        
         _webServer.on("/circuco.css", [&](AsyncWebServerRequest *request) {
             request->send(200, "text/css", _fileSystem.css().c_str());
         });
@@ -29,47 +31,47 @@ public:
         // from-To
         _webServer.on("/if", [&](AsyncWebServerRequest *request) {
             config.changeFrom(1);
-            sendDocument(request);
+            sendDocument(request, _htmlRenderer);
         });
         _webServer.on("/df", [&](AsyncWebServerRequest *request) {
             config.changeFrom(-1);
-            sendDocument(request);
+            sendDocument(request, _htmlRenderer);
         });
         _webServer.on("/it", [&](AsyncWebServerRequest *request) {
             config.changeTo(1);
-            sendDocument(request);
+            sendDocument(request, _htmlRenderer);
         });
         _webServer.on("/dt", [&](AsyncWebServerRequest *request) {
             config.changeTo(-1);
-            sendDocument(request);
+            sendDocument(request, _htmlRenderer);
         });
 
         // duration-interval
         _webServer.on("/id", [&](AsyncWebServerRequest *request) {
             config.changeDuration(1);
-            sendDocument(request);
+            sendDocument(request, _htmlRenderer);
         });
         _webServer.on("/dd", [&](AsyncWebServerRequest *request) {
             config.changeDuration(-1);
-            sendDocument(request);
+            sendDocument(request, _htmlRenderer);
         });
         _webServer.on("/ii", [&](AsyncWebServerRequest *request) {
             config.changeInterval(1);
-            sendDocument(request);
+            sendDocument(request, _htmlRenderer);
         });
         _webServer.on("/di", [&](AsyncWebServerRequest *request) {
             config.changeInterval(-1);
-            sendDocument(request);
+            sendDocument(request, _htmlRenderer);
         });
 
         // rate-of-change
         _webServer.on("/ir", [&](AsyncWebServerRequest *request) {
             config.changeRoc(0.1f);
-            sendDocument(request);
+            sendDocument(request, _htmlRenderer);
         });
         _webServer.on("/dr", [&](AsyncWebServerRequest *request) {
             config.changeRoc(-0.1f);
-            sendDocument(request);
+            sendDocument(request, _htmlRenderer);
         });
 
         _webServer.begin();
@@ -79,20 +81,20 @@ public:
     }
 
 private:
-    void sendDocument(AsyncWebServerRequest *request) {
+    void sendDocument(AsyncWebServerRequest *request, const HtmlRendererBase& renderer) {
         AsyncWebServerResponse *response = request->beginUserDataResponse("text/html", [&](uint8_t *buffer, size_t maxLen, std::any& userData) -> size_t {
             // If user data is not set yet, we start with index 0 and try again
             if (!userData.has_value()) {
                 userData = (size_t)0;
-                _renderer.render();
+                renderer.render();
                 return RESPONSE_TRY_AGAIN;
-            } else if (std::any_cast<size_t>(userData) >= _renderer.tokens().size()) {
+            } else if (std::any_cast<size_t>(userData) >= renderer.tokens().size()) {
                 return 0;
             }
             // Write up to "maxLen" bytes into "buffer" and return the amount written.
             // You will be asked for more data until 0 is returned
             size_t i = std::any_cast<size_t>(userData);
-            const auto& tokens = _renderer.tokens();
+            const auto& tokens = renderer.tokens();
             const size_t tokenSize = tokens.at(i).get().size();
             if (tokenSize > maxLen) {
                 std::cout << "token " << i << " with length: " << tokenSize << " exceeds max length: " << maxLen << std::endl;
@@ -113,7 +115,7 @@ private:
         request->send(response);
     }
 
-    HtmlRenderer& _renderer;
+    HtmlRendererBase& _htmlRenderer;
     const FileSystemBase& _fileSystem;
     AsyncWebServer _webServer;
 };

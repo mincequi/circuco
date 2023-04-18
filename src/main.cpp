@@ -1,14 +1,11 @@
-//#include <Arduino.h>
-//#include <HardwareSerial.h>
-
-#include <Logger.hpp>
 #include <bl/DeviceManager.hpp>
 #include <bl/WifiManager.hpp>
 #include <io/FileSystem.hpp>
 #include <io/ActuatorGpio.hpp>
 #include <io/SensorTemperatureDs18b20.hpp>
 #include <io/Time.hpp>
-#include <ui/HtmlRenderer.hpp>
+#include <ui/HtmlRendererMain.hpp>
+#include <ui/HtmlRendererSetup.hpp>
 //#include <ui/HttpServer.hpp>
 #include <ui/HttpServerAsync.hpp>
 
@@ -27,7 +24,7 @@ Config config(fileSystem, _time);
 // These are our heap components
 std::unique_ptr<WifiManager> wifiManager;
 std::unique_ptr<DeviceManager> deviceManager;
-std::unique_ptr<HtmlRenderer> htmlRenderer;
+std::unique_ptr<HtmlRendererBase> htmlRenderer;
 std::unique_ptr<HttpServer> httpServer;
 
 void setup() {
@@ -36,6 +33,13 @@ void setup() {
     LOG("");
     LOG("setup");
     pinMode(LED_BUILTIN, OUTPUT);
+
+    /*
+    const int prevCpuFreq = system_get_cpu_freq();
+    system_update_cpu_freq(160);
+    const int cpuFreq = system_get_cpu_freq();
+    LOG("Change clock speed from: " << prevCpuFreq << " Mhz to: " << cpuFreq << " Mhz");
+    */
 
     // Configure time for Germany
     configTime("CET-1CEST,M3.5.0/02,M10.5.0/3", "de.pool.ntp.org");
@@ -47,12 +51,14 @@ void setup() {
     // Create heap components
     wifiManager = std::make_unique<WifiManager>(config);
     deviceManager = std::make_unique<DeviceManager>(config, sensor, actuator);
-    htmlRenderer = std::make_unique<HtmlRenderer>(config, sensor, actuator, *deviceManager, fileSystem, _time);
+    if (config.aps().empty())
+        htmlRenderer =  std::make_unique<HtmlRendererSetup>(fileSystem.setupHtmlTemplate(), config);
+    else
+        htmlRenderer = std::make_unique<HtmlRendererMain>(fileSystem.mainHtmlTemplate(), config, sensor, actuator, *deviceManager, _time);
     httpServer = std::make_unique<HttpServer>(config, *htmlRenderer, fileSystem);
 
     // Setup heap components
     wifiManager->setup();
-    htmlRenderer->setup();
 }
 
 void loop() {

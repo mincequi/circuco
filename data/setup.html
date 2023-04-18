@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--meta http-equiv="refresh" content="1; url=/" /-->
+    <link rel="stylesheet" href="https://bootswatch.com/5/darkly/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css@0.9.0/dist/charts.min.css">
+    <link rel="stylesheet" type="text/css" href="circuco.css">
+    <title>circuco</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header" id="banner">
+        <div class="row">
+          <div class="col-9">
+            <h1>circuco</h1>
+            <p class="lead">A circulator pump controller</p>
+          </div>
+          <div class="col-3">
+            <h1 class="text-end">{{setup}}</h1>
+          </div>
+        </div>
+      </div>
+
+      <form action="/ap" method="GET">
+      <div class="form-floating">
+        <input class="form-control" id="fi" placeholder="Network Name" value="Kay-Fi">
+        <label for="fi">Network Name</label>
+      </div>
+      <div class="form-floating mb-3">
+        <input type="password" class="form-control" id="fp" placeholder="Password" value="Pw1">
+        <label for="fp">Password</label>
+      </div>
+      </form>
+
+      <div class="form-floating">
+        <input class="form-control" id="fi" placeholder="Network Name" value="Kay-ller">
+        <label for="fi">Network Name</label>
+      </div>
+      <div class="form-floating mb-3">
+        <input type="password" class="form-control" id="fp" placeholder="Password" value="Pw2">
+        <label for="fp">Password</label>
+      </div>
+
+    </div>
+  </body>
+</html>

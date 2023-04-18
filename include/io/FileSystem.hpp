@@ -19,20 +19,12 @@ public:
     ~FileSystem() {
     }
 
-    std::string htmlTemplate() const override {
-        auto _htmlTemplate = loadFile("circuco.html");
-        std::cout << "HTML template minified from " << _htmlTemplate.size();
-        // TODO: this causes an OOM
-        //const std::regex rx1("<!--\\.+-->");
-        const std::regex rx2("\\s+<");
-        const std::regex rx3(">\\s+");
-        //_htmlTemplate = std::regex_replace(_htmlTemplate, rx1, "");
-        _htmlTemplate = std::regex_replace(_htmlTemplate, rx2, "<");
-        _htmlTemplate = std::regex_replace(_htmlTemplate, rx3, ">");
-        std::cout << " to " << _htmlTemplate.size() << " bytes" << std::endl;
-        _htmlTemplate.shrink_to_fit();
+    std::string mainHtmlTemplate() const override {
+        return shrinkHtml(loadFile("circuco.html"));
+    }
 
-        return _htmlTemplate;
+    std::string setupHtmlTemplate() const override {
+        return shrinkHtml(loadFile("setup.html"));
     }
 
     std::string css() const override {

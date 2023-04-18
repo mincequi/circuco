@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstdint>
+
 class ActuatorBase {
 public:
-    void setActive(uint tsMs, bool active = true) {
+    void setActive(uint32_t tsMs, bool active = true) {
         if (_isActive == active) return;
 
         _isActive = active;
@@ -14,7 +16,7 @@ public:
         return _isActive;
     }
 
-    uint lastActiveSinceTsMs() const {
+    uint32_t lastActiveSinceTsMs() const {
         return _lastActiveSinceTsMs;
     }
 
@@ -23,5 +25,5 @@ protected:
 
 private:
     bool _isActive = false;
-    uint _lastActiveSinceTsMs = 0;
+    uint32_t _lastActiveSinceTsMs = 0;
 };

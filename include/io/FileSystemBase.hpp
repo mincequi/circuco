@@ -7,10 +7,9 @@ class FileSystemBase {
 public:
     using ConfigType = std::variant<int, float, std::string>;
 
-    virtual std::string htmlTemplate() const = 0;
-
+    virtual std::string mainHtmlTemplate() const = 0;
+    virtual std::string setupHtmlTemplate() const = 0;
     virtual std::string css() const = 0;
-
     virtual std::string config() const = 0;
 
     virtual void beginWriteConfig() {};

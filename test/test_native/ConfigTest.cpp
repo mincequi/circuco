@@ -4,7 +4,8 @@
 #include <io/TimeBase.hpp>
 
 class FileSystemMock : public FileSystemBase {
-    virtual std::string htmlTemplate() const override {};
+    virtual std::string mainHtmlTemplate() const override {};
+    virtual std::string setupHtmlTemplate() const override {};
     virtual std::string css() const override {};
     virtual std::string config() const override {
         return "aps = ["

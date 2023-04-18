@@ -26,10 +26,7 @@ public:
 
     void setup() {
         if (_wifi.run() == WL_CONNECTED) {
-            Serial.print("WiFi connected: ");
-            Serial.print(WiFi.SSID());
-            Serial.print(" with ip: ");
-            Serial.println(WiFi.localIP());
+            LOG("connected to " << WiFi.SSID().c_str() << " with ip " << WiFi.localIP().toString().c_str());
             _isConnected = true;
         }
     }

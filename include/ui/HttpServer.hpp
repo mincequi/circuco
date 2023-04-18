@@ -4,16 +4,17 @@
 
 #include <bl/Config.hpp>
 #include <io/FileSystemBase.hpp>
-#include <ui/HtmlRenderer.hpp>
+
+#include "HtmlRendererBase.hpp"
 
 class HttpServer {
 public:
-    HttpServer(Config& config, const HtmlRenderer& renderer, const FileSystemBase& fileSystem) :
-    _renderer(renderer),
+    HttpServer(Config& config, const HtmlRendererBase& renderer, const FileSystemBase& fileSystem) :
+    _htmlRenderer(renderer),
     _fileSystem(fileSystem),
     _httpServer(80) {
 
-    _httpServer.on("/", [&]() {
+        _httpServer.on("/", [&]() {
             sendDocument();
         });
         _httpServer.on("/circuco.css", [&]() {
@@ -80,14 +81,14 @@ private:
     void sendDocument() {
         _httpServer.setContentLength(CONTENT_LENGTH_UNKNOWN);
         _httpServer.send(200, "text/html", "");
-        for (const auto& t : _renderer.tokens()) {
+        for (const auto& t : _htmlRenderer.tokens()) {
             _httpServer.sendContent(t.get().c_str());
         }
 
         _httpServer.sendContent("");
     }
 
-    const HtmlRenderer& _renderer;
+    const HtmlRendererBase& _htmlRenderer;
     const FileSystemBase& _fileSystem;
     ESP8266WebServer _httpServer;
 };

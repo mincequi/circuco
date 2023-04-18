@@ -1,8 +1,16 @@
 #pragma once
 
 #include <iomanip>
+#include <regex>
 #include <sstream>
 #include <string>
+
+#include "Logger.hpp"
+
+// helper type for the visitor #4
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+// explicit deduction guide (not needed as of C++20)
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 static std::string toTime(int minutes) {
     std::stringstream ss;
@@ -28,7 +36,18 @@ static std::string toDuration(int seconds_, const std::string& nullString) {
     return ss.str();
 }
 
-// helper type for the visitor #4
-template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-// explicit deduction guide (not needed as of C++20)
-template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+std::string shrinkHtml(std::string&& html) {
+    const auto orgSize = html.size();
+    // TODO: this causes an OOM
+    //const std::regex rx1("<!--\\.+-->");
+    const std::regex rx2("\\s+<");
+    const std::regex rx3(">\\s+");
+    //html = std::regex_replace(html, rx1, "");
+    html = std::regex_replace(html, rx2, "<");
+    html = std::regex_replace(html, rx3, ">");
+    html.shrink_to_fit();
+
+    LOG("HTML minified from " << orgSize << " to " << html.size() << " bytes");
+
+    return html;
+}
