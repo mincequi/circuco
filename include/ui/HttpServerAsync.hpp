@@ -15,8 +15,35 @@ public:
     _fileSystem(fileSystem),
     _webServer(80) {
 
-        _webServer.on("/", [&](AsyncWebServerRequest *request) {
+        _webServer.on("/", HTTP_GET, [&](AsyncWebServerRequest *request) {
             sendDocument(request, _htmlRenderer);
+        });
+
+        _webServer.on("/addap", HTTP_POST, [&](AsyncWebServerRequest *request) {
+            const auto args_ = request->args();
+            std::unordered_map<std::string, std::string> args;
+            for (size_t i = 0; i < args_; ++i) {
+                const auto* key = request->argName(i).c_str();
+                const auto* value = request->arg(i).c_str();
+                args[key] = value;
+            }
+            const auto& ssid = args["ssid"];
+            const auto& pw = args["pw"];
+            if (!ssid.empty() && !pw.empty()) {
+                LOG("addap> " << ssid << ": *****");
+                config.addAp(ssid, pw);
+            }
+
+            request->redirect("/");
+        });
+
+        _webServer.on("/rmap", HTTP_POST, [&](AsyncWebServerRequest *request) {
+            if (request->args()) {
+                const auto* ssid = request->argName((size_t)0).c_str();
+                LOG("rmap> " << ssid);
+                config.rmAp(ssid);
+            }
+            request->redirect("/");
         });
         
         _webServer.on("/circuco.css", [&](AsyncWebServerRequest *request) {

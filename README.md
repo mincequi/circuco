@@ -2,13 +2,17 @@
 ### A circulator pump controller for ESP8266 and friends
 
 ## Features
+* wifi setup page
 * time period per day
 * interval and duration
 * external temperature sensor
 
 ## TODO
-* WiFi setup page
+* access point mode
 * use HTML POST to submit data
+* reset button
+* iOS button for web app
+* work without wifi
 * switch to javascript for graph
 
 ## Licensing

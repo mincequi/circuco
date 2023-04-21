@@ -16,8 +16,7 @@ class FileSystemMock : public FileSystemBase {
 };
 
 class TimeMock : public TimeBase {
-    virtual void doLoop() override {
-    }
+    virtual void doLoop() override {}
 };
 
 FileSystemMock fileSystemMock;
@@ -25,21 +24,15 @@ TimeMock timeMock;
 
 Config cut(fileSystemMock, timeMock);
 
-void setUp(void) {
-    cut.setup();
-}
-
-void tearDown(void) {
-}
-
-void config_parses_aps(void) {
+void tinja_parses_setup(void) {
     TEST_ASSERT_EQUAL_INT(2, cut.aps().size());
     TEST_ASSERT(cut.aps().at(0).first == "Ssid1");
     TEST_ASSERT(cut.aps().at(1).second == "Password2");
 }
 
-int main(void) {
+auto runTinjaTest() {
+    cut.setup();
     UNITY_BEGIN();
-    RUN_TEST(config_parses_aps);
+    RUN_TEST(tinja_parses_setup);
     return UNITY_END();
 }

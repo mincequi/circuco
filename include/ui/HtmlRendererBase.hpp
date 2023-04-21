@@ -7,13 +7,14 @@
 class HtmlRendererBase {
 public:
     HtmlRendererBase(const std::string& templ) {
-        const auto tokenCount = _templ.parse(templ);
-        LOG("HTML template tokenized to " << tokenCount << " tokens");
+        const auto nodeCount = _templ.parse(templ);
+        LOG(nodeCount << " nodes parsed");
     }
 
     void render() const {
         doRender(_data);
         _templ.renderTo(_data, _tokens);
+        LOG(_tokens.size() << " tokens rendered");
     }
 
     const tinja::Template::Tokens& tokens() const {

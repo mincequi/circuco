@@ -51,10 +51,10 @@ void setup() {
     // Create heap components
     wifiManager = std::make_unique<WifiManager>(config);
     deviceManager = std::make_unique<DeviceManager>(config, sensor, actuator);
-    if (config.aps().empty())
+    //if (config.aps().empty())
         htmlRenderer =  std::make_unique<HtmlRendererSetup>(fileSystem.setupHtmlTemplate(), config);
-    else
-        htmlRenderer = std::make_unique<HtmlRendererMain>(fileSystem.mainHtmlTemplate(), config, sensor, actuator, *deviceManager, _time);
+    //else
+        //htmlRenderer = std::make_unique<HtmlRendererMain>(fileSystem.mainHtmlTemplate(), config, sensor, actuator, *deviceManager, _time);
     httpServer = std::make_unique<HttpServer>(config, *htmlRenderer, fileSystem);
 
     // Setup heap components

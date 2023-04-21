@@ -14,6 +14,11 @@ public:
 
 private:
     void doRender(tinja::DataMap& data) const override {
+        std::vector<std::string> aps;
+        for (const auto& ap : _config.aps()) {
+            aps.push_back(ap.first);
+        }
+        data["aps"] = aps;
     }
 
     const Config& _config;

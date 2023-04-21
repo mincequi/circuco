@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <unordered_map>
 
 #include <tomlcpp.hpp>
 
@@ -26,7 +27,7 @@ static const int _durationIntervalOffset = 17;
 
 class Config {
 public:
-    using Aps = std::vector<std::pair<std::string, std::string>>;
+    using Aps = std::unordered_map<std::string, std::string>;
 
     Config(FileSystemBase& fileSystem, const TimeBase& time) :
         _fileSystem(fileSystem),
@@ -47,6 +48,18 @@ public:
 
     const Aps& aps() const {
         return _aps;
+    }
+
+    void addAp(const std::string& ssid, const std::string& pw) {
+        _aps[ssid] = pw;
+        _isDirty = true;
+        save();
+    }
+
+    void rmAp(const std::string& ssid) {
+        _aps.erase(ssid);
+        _isDirty = true;
+        save();
     }
 
     std::string strFrom() const {
@@ -150,7 +163,7 @@ private:
             const auto[passwordOk, password] = ap->getString("password");
             if (!ssidOk || !passwordOk) continue;
 
-            _aps.push_back({ ssid, password });
+            _aps[ssid] = password;
         }
 
         // 3. Other values
@@ -175,14 +188,16 @@ private:
 
         if (!_aps.empty()) {
             _fileSystem.writeConfig("aps = [", true);
-            for (size_t i = 0; i < _aps.size(); ++i) {
+            size_t i = 0;
+            for (const auto& ap : _aps) {
                 _fileSystem.writeConfig("  { ssid = \"");
-                _fileSystem.writeConfig(_aps.at(i).first);
+                _fileSystem.writeConfig(ap.first);
                 _fileSystem.writeConfig("\", password = \"");
-                _fileSystem.writeConfig(_aps.at(i).second);
+                _fileSystem.writeConfig(ap.second);
                 _fileSystem.writeConfig("\" }");
                 if (i + 1 < _aps.size()) _fileSystem.writeConfig(",");
                 _fileSystem.writeConfig("", true);
+                ++i;
             }
             _fileSystem.writeConfig("]", true);
         }

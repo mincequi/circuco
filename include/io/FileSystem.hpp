@@ -12,7 +12,7 @@ class FileSystem : public FileSystemBase {
 public:
     FileSystem() {
         if (!LittleFS.begin()) {
-            std::cerr << "FileSystem initialization failed." << std::endl;
+            LOG("FileSystem initialization failed.");
         };
     }
 
