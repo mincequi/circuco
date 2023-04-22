@@ -1,3 +1,5 @@
+#include <ESP_DoubleResetDetector.h>
+
 #include <bl/DeviceManager.hpp>
 #include <bl/WifiManager.hpp>
 #include <io/FileSystem.hpp>
@@ -10,6 +12,7 @@
 #include <ui/HttpServerAsync.hpp>
 
 // These are our stack components
+DoubleResetDetector resetDetector(5, 0);
 SensorTemperatureDs18b20 sensor;
 ActuatorGpio actuator;
 FileSystem fileSystem;
@@ -48,23 +51,28 @@ void setup() {
     sensor.setup();
     config.setup();
 
+    // Check for reset
+    if (resetDetector.detectDoubleReset()) {
+        config.clearAps();
+    }
+
     // Create heap components
     wifiManager = std::make_unique<WifiManager>(config);
     deviceManager = std::make_unique<DeviceManager>(config, sensor, actuator);
-    //if (config.aps().empty())
+    if (config.aps().empty()) {
+        LOG("launch setup page");
         htmlRenderer =  std::make_unique<HtmlRendererSetup>(fileSystem.setupHtmlTemplate(), config);
-    //else
-        //htmlRenderer = std::make_unique<HtmlRendererMain>(fileSystem.mainHtmlTemplate(), config, sensor, actuator, *deviceManager, _time);
-    httpServer = std::make_unique<HttpServer>(config, *htmlRenderer, fileSystem);
+    } else {
+        LOG("launch main page");
+        htmlRenderer = std::make_unique<HtmlRendererMain>(fileSystem.mainHtmlTemplate(), config, sensor, actuator, *deviceManager, _time);
+    }
 
-    // Setup heap components
-    wifiManager->setup();
+    httpServer = std::make_unique<HttpServer>(config, *htmlRenderer, fileSystem);
 }
 
 void loop() {
-    if (!wifiManager->isConnected()) {
-        wifiManager->setup();
-    }
+    resetDetector.loop();
+    wifiManager->loop();
 
     // Check if we want to update devices
     static uint _lastDevicePoll = 0;

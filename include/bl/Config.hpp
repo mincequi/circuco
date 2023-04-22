@@ -62,6 +62,12 @@ public:
         save();
     }
 
+    void clearAps() {
+        _aps.clear();
+        _isDirty = true;
+        save();
+    }
+
     std::string strFrom() const {
         return toTime(_from*15);
     }
