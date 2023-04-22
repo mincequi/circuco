@@ -6,6 +6,8 @@
 #include <sstream>
 #include <string>
 
+#include <Logger.hpp>
+
 template<class T>
 class SensorBase {
 public:
@@ -74,8 +76,8 @@ protected:
 private:
     uint _ts = 0;
     T _value = 0;
-    T _minValue = std::numeric_limits<T>::max();
-    T _maxValue = std::numeric_limits<T>::min();
+    T _minValue = 12800;
+    T _maxValue = 128;
 
     float _roc = 0;
     float _minRoc = std::numeric_limits<T>::max();

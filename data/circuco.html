@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="circuco" />
+    <meta name="application-name" content="circuco" />
     <meta http-equiv="refresh" content="1; url=/" />
     <link rel="stylesheet" href="https://bootswatch.com/5/darkly/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css@0.9.0/dist/charts.min.css">
@@ -127,7 +131,7 @@
       <div class="col-12">
         <table class="charts-css column data-spacing-1" id="temperature" >
           <tbody>
-            {[<tr><td style="--size: calc({{sh}}/{{maxH}});{{ah}}"></td></tr>]}
+            {[<tr><td style="--size: calc(0.4 + 0.6 * {{sh}}/{{maxH}});{{ah}}"></td></tr>]}
           </tbody>
         </table>
       </div>

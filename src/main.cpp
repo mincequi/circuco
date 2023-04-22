@@ -12,7 +12,7 @@
 #include <ui/HttpServerAsync.hpp>
 
 // These are our stack components
-DoubleResetDetector resetDetector(5, 0);
+DoubleResetDetector resetDetector(3, 0);
 SensorTemperatureDs18b20 sensor;
 ActuatorGpio actuator;
 FileSystem fileSystem;
@@ -36,13 +36,6 @@ void setup() {
     LOG("");
     LOG("setup");
     pinMode(LED_BUILTIN, OUTPUT);
-
-    /*
-    const int prevCpuFreq = system_get_cpu_freq();
-    system_update_cpu_freq(160);
-    const int cpuFreq = system_get_cpu_freq();
-    LOG("Change clock speed from: " << prevCpuFreq << " Mhz to: " << cpuFreq << " Mhz");
-    */
 
     // Configure time for Germany
     configTime("CET-1CEST,M3.5.0/02,M10.5.0/3", "de.pool.ntp.org");
@@ -79,12 +72,7 @@ void loop() {
     static uint _lastSavePoll = 0;
     const auto now = millis();
 
-    // TODO: comment this for WIFFI pump
-    digitalWrite(LED_BUILTIN, HIGH);
-
     if (_lastDevicePoll + config.deviceInterval < now) {
-        // TODO: comment this for WIFFI pump
-        digitalWrite(LED_BUILTIN, LOW);
         _lastDevicePoll = now;
         _time.loop();
         deviceManager->loop(now);
@@ -92,7 +80,4 @@ void loop() {
         _lastSavePoll = now;
         config.loop(now);
     }
-
-  // turn the LED on (HIGH is the voltage level)
-  //digitalWrite(LED_BUILTIN, millis()%5000/200 == 0 ? LOW : HIGH);
 }

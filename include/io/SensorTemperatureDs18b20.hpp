@@ -46,5 +46,5 @@ private:
 
     OneWire _oneWire;
     DallasTemperature _sensor;
-    Mode _mode = Mode::Demo;
+    Mode _mode = Mode::Regular;
 };

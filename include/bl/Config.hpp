@@ -132,7 +132,7 @@ public:
         return _daysUp;
     }
 
-    static const size_t historySize = 60;
+    static const size_t historySize = 45;
     static const size_t deviceInterval = 1000;
     static const size_t saveInterval = 60000;
 
@@ -236,8 +236,8 @@ private:
 
     int _from = 24;     // 06:00
     int _to = 72;       // 18:00
-    //int _duration = 19; // 03:00m
-    int _dur = 1; // 00:01m
-    int _intvl = 14; // 01:00h
-    float _roc = 2.0f;
+    int _dur = 19;      // 3 min
+    //int _dur = 1;     // 3 sec
+    int _intvl = 14;    // 01:00h
+    float _roc = 0.4f;
 };

@@ -14,7 +14,7 @@ public:
     void render() const {
         doRender(_data);
         _templ.renderTo(_data, _tokens);
-        LOG(_tokens.size() << " tokens rendered");
+        //LOG(_tokens.size() << " tokens rendered");
     }
 
     const tinja::Template::Tokens& tokens() const {

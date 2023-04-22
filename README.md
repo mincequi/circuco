@@ -1,6 +1,8 @@
 # circuco
 ### A circulator pump controller for ESP8266 and friends
 
+<img src="https://github.com/mincequi/circuco/blob/main/doc/circuco_main.png" width="195">
+
 ## Features
 * access point/setup mode
 * time period per day
@@ -8,6 +10,7 @@
 * external temperature sensor
 
 ## TODO
+* optimize AsyncWebServer
 * support wiffi button
 * use HTML POST to submit data
 * iOS icon for web app
