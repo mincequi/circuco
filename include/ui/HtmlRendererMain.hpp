@@ -26,7 +26,7 @@ private:
     void doRender(tinja::DataMap& data) const override {
         data["tm"] = _time.strTime();
 
-        data["up"] = std::to_string(_config.daysUp());
+        data["up"] = toUptime(_config.uptime());
         data["f"] = _config.strFrom();
         data["t"] = _config.strTo();
         data["d"] = _config.strDuration();

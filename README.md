@@ -10,6 +10,7 @@
 * external temperature sensor
 
 ## TODO
+* properly implement demo mode
 * optimize AsyncWebServer
 * support wiffi button
 * use HTML POST to submit data

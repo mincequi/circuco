@@ -20,13 +20,14 @@ static const std::vector<int> _durations = {
      60,  75,  90,  120,  150,  180,  240,  300,  360, 480,
     600, 720, 900, 1200, 1500, 1800, 2400, 3000, 3600
 };
-
 static const int _maxDuration = _durations.size()-1;
-static const int _maxInterval = 27;
-static const int _durationIntervalOffset = 17;
 
 class Config {
 public:
+    enum class Mode {
+        Demo,
+        Regular
+    };
     using Aps = std::unordered_map<std::string, std::string>;
 
     Config(FileSystemBase& fileSystem, const TimeBase& time) :
@@ -42,7 +43,7 @@ public:
     }
 
     void loop(uint ts) {
-        _daysUp = ts / 1000 / 60 / 60 / 24;
+        _uptime = ts;
         save();
     }
 
@@ -128,15 +129,21 @@ public:
         changeValue(&_roc, d, 0.0f, 2.0f);
     }
 
-    int daysUp() const {
-        return _daysUp;
+    uint uptime() const {
+        if (mode == Mode::Demo)
+            return (rand() % 72) * 1000 * 60 * 60;
+        return _uptime;
     }
 
     static const size_t historySize = 45;
     static const size_t deviceInterval = 1000;
     static const size_t saveInterval = 60000;
+    static const Mode mode = Mode::Regular;
 
 private:
+    static const int _maxInterval = 27;
+    static const int _durationIntervalOffset = 17;
+
     template <typename T>
     T changeValue(T* v, T d, T lo, T hi) {
         const auto ret = std::clamp(*v+d, lo, hi);
@@ -229,7 +236,7 @@ private:
     FileSystemBase& _fileSystem;
     const TimeBase& _time;
     
-    int _daysUp = 0;
+    uint _uptime = 0;
     Aps _aps;
 
     bool _isDirty = false;

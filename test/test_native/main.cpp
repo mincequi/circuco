@@ -1,6 +1,8 @@
 #include "ConfigTest.hpp"
+#include "UtilTest.hpp"
 
 int main() {
-    runTinjaTest();
+    runConfigTest();
+    runUtilTest();
     return 0;
 }
